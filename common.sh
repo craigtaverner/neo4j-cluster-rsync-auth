@@ -99,6 +99,53 @@ function configureCluster() {
   done
 }
 
+function makeClusterConfigLocal() {
+  cp -a cluster.config cluster.config.local
+  rm -f crontab.local
+  touch crontab.local
+  logfile="$(pwd)/cluster_rsync.log"
+  prefix=$1
+  typeset -i i END # Let's be explicit
+  let END=$2
+  for ((i=1;i<=END;++i)); do
+    dir="${prefix}_${i}"
+    path="$(pwd)/${dir}"
+    address="${USER}@localhost"
+    if [ -d "$dir" ] ; then
+      echo "Making cluster config for $dir using address $address and path $path"
+      echo "$dir    $address    $path" >> cluster.config.local
+      echo "* * * * *    $path/bin/rsync_auth.sh >> $logfile" >> crontab.local
+    else
+      echo "Directory does not exist: $dir"
+    fi
+  done
+}
+
+function configureClusterRSync() {
+  prefix=$1
+  typeset -i i END # Let's be explicit
+  let END=$2
+  for ((i=1;i<=END;++i)); do
+    dir="${prefix}_${i}"
+    path="$(pwd)/${dir}"
+    if [ -d "$dir" ] ; then
+      echo "Configuring cluster rsync for installation at $dir"
+      mkdir -p $dir/conf
+      cp -a cluster.config.local $dir/conf/cluster.config
+      cp -a rsync_auth.sh $dir/bin/
+    else
+      echo "Directory does not exist: $dir"
+    fi
+  done
+  if [ -f "crontab.local" ] ; then
+    echo "Installing crontab"
+    crontab crontab.local
+  else
+    echo "No crontab.local found"
+  fi
+  crontab -l
+}
+
 function clearCluster() {
   prefix=$1
   typeset -i i END # Let's be explicit
