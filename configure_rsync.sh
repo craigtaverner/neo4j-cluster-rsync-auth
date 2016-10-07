@@ -7,5 +7,12 @@ if [ -z "$USER" ] ; then
   exit -1
 fi
 
-makeClusterConfigLocal "core" $NUMBER_CORES
+initClusterConfigLocal
+
+addToClusterConfigLocal "core" $NUMBER_CORES
+addToClusterConfigLocal "edge" $NUMBER_EDGES
+
 configureClusterRSync "core" $NUMBER_CORES
+configureClusterRSync "edge" $NUMBER_EDGES
+
+installClusterRSyncCrontab

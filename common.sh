@@ -151,10 +151,13 @@ function configureCluster() {
   done
 }
 
-function makeClusterConfigLocal() {
+function initClusterConfigLocal() {
   cp -a cluster.config cluster.config.local
   rm -f crontab.local
   touch crontab.local
+}
+
+function addToClusterConfigLocal() {
   logfile="$(pwd)/cluster_rsync.log"
   prefix=$1
   typeset -i i END # Let's be explicit
@@ -189,6 +192,16 @@ function configureClusterRSync() {
       echo "Directory does not exist: $dir"
     fi
   done
+}
+
+function installClusterRSyncCrontab() {
+  logfile="$(pwd)/cluster_rsync.log"
+  if [ -f "$logfile.backup" ] ; then
+    tar czf "$logfile.backup.tgz" "$logfile.backup"
+  fi
+  if [ -f "$logfile" ] ; then
+    mv "$logfile" "$logfile.backup"
+  fi
   if [ -f "crontab.local" ] ; then
     echo "Installing crontab"
     crontab crontab.local
