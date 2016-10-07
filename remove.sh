@@ -2,5 +2,5 @@
 
 source common.sh
 
-stopCluster "core" $NUMBER_CORES
+deleteCluster "edge" $NUMBER_EDGES
 deleteCluster "core" $NUMBER_CORES
