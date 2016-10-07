@@ -1,5 +1,14 @@
 --- neo4j-enterprise-3.1.0-BETA1/conf/neo4j.conf	2016-10-06 06:03:07.000000000 +0200
 +++ core_1/conf/neo4j.conf	2016-10-06 12:17:19.000000000 +0200
+@@ -45,7 +45,7 @@
+ #dbms.backup.enabled=true
+ 
+ # To allow remote backups, uncomment this line:
+-#dbms.backup.address=0.0.0.0:6362
++dbms.backup.address=0.0.0.0:6351
+ 
+ #*****************************************************************
+ # Network connector configuration
 @@ -70,15 +70,15 @@
  # Bolt connector
  dbms.connector.bolt.enabled=true
