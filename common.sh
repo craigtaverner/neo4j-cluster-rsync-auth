@@ -27,6 +27,35 @@ if [ -z "$NUMBER_EDGES" ] ; then
   echo "Setting NUMBER_EDGES to default: $NUMBER_EDGES"
 fi
 
+max_cores=9
+max_edges=9
+min_cores=1
+min_edges=0
+
+if [ $NUMBER_CORES -gt $max_cores ] ; then
+  echo "Number of cores set too high: $NUMBER_CORES"
+  export NUMBER_CORES=$max_cores
+  echo "Setting NUMBER_CORES to max: $NUMBER_CORES"
+fi
+
+if [ $NUMBER_CORES -lt $min_cores ] ; then
+  echo "Number of cores set too low: $NUMBER_CORES"
+  export NUMBER_CORES=$min_cores
+  echo "Setting NUMBER_CORES to min: $NUMBER_CORES"
+fi
+
+if [ $NUMBER_EDGES -gt $max_edges ] ; then
+  echo "Number of edges set too high: $NUMBER_EDGES"
+  export NUMBER_EDGES=$max_edges
+  echo "Setting NUMBER_EDGES to max: $NUMBER_EDGES"
+fi
+
+if [ $NUMBER_EDGES -lt $min_edges ] ; then
+  echo "Number of edges set too low: $NUMBER_EDGES"
+  export NUMBER_EDGES=$min_edges
+  echo "Setting NUMBER_EDGES to min: $NUMBER_EDGES"
+fi
+
 function installCluster() {
   prefix=$1
   typeset -i i END # Let's be explicit
