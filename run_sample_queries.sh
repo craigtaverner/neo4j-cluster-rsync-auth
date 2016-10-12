@@ -31,14 +31,11 @@ function runQueryOn() {
     duration=$((${index} * 10))
     cypher="CALL test.waitFor('${duration}s')"
   fi
-  case "$prefix" in
-  "core")
+  if [ "$prefix" = "core" ] ; then
     address="bolt://localhost:769$index"
-    ;;
-  "*")
+  else
     address="bolt://localhost:760$index"
-    ;;
-  esac
+  fi
   dir="${prefix}_${index}"
   if [ -n "$duration" ] ; then
     meta="{$prefix:'$index',user:'$username',duration:'${duration}s'}"
@@ -46,8 +43,11 @@ function runQueryOn() {
     meta="{$prefix:'$index',user:'$username'}"
   fi
   if [ -d "$dir" ] ; then
-    echo "Running query on $dir as '$username': \"$cypher\""
+    echo "Running query on $dir at $address as '$username': \"$cypher\""
     rm -f temp.cypher
+    echo ":param name '$username'" >> temp.cypher
+    echo ":param index '$index'" >> temp.cypher
+    echo ":param prefix '$prefix'" >> temp.cypher
     echo ":begin" >> temp.cypher
     echo "CALL dbms.setTXMetaData(${meta});" >> temp.cypher
     echo "${cypher};" >> temp.cypher
@@ -63,11 +63,17 @@ function runQueriesOnCluster() {
   typeset -i i END # Let's be explicit
   let END=$2
   for ((i=1;i<=END;++i)); do
-    runQueryOn $prefix $i $3 $4 "CALL test.waitFor('${5}s')"
+    runQueryOn $prefix $i $3 $4 "$(makeQuery $5 $3)"
   done
+}
+
+function makeQuery() {
+  duration=$1
+  username=$2
+  echo "OPTIONAL MATCH (n) WITH '$username' as user, collect(n) as nodes CALL test.waitFor('${duration}s') RETURN 0"
 }
 
 runQueriesOnCluster "core" $NUMBER_CORES "$USER_NAME" "$USER_PW" 30
 runQueriesOnCluster "edge" $NUMBER_EDGES "$USER_NAME" "$USER_PW" 20
 
-runQueryOn "core" $LONG_INDEX "$USER_NAME" "$USER_PW" "CALL test.waitFor('120s')"
+runQueryOn "core" $LONG_INDEX "$USER_NAME" "$USER_PW" "$(makeQuery 120 slow_$USER_NAME)"

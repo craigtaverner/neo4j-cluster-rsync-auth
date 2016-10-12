@@ -23,10 +23,19 @@
  
  # To allow remote backups, uncomment this line:
 -#dbms.backup.address=0.0.0.0:6362
-+dbms.backup.address=0.0.0.0:6371
++dbms.backup.address=0.0.0.0:6381
  
  #*****************************************************************
  # Network connector configuration
+@@ -61,7 +61,7 @@
+ # Neo4j advertises the addresses its connectors.
+ # To specify the hostname or IP address of this server used in the advertised addresses,
+ # change this to the address of the network adapter you want to advertise.
+-#dbms.connectors.default_advertised_address=localhost
++dbms.connectors.default_advertised_address=localhost
+ 
+ # You can also choose a specific advertised hostname or IP address, and
+ # configure an advertised port for each connector, by setting their
 @@ -70,15 +70,15 @@
  # Bolt connector
  dbms.connector.bolt.enabled=true

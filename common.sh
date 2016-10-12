@@ -56,6 +56,12 @@ if [ $NUMBER_EDGES -lt $min_edges ] ; then
   echo "Setting NUMBER_EDGES to min: $NUMBER_EDGES"
 fi
 
+function deleteKnownHosts() {
+  if [ -f "$HOME/.neo4j/known_hosts" ] ; then
+    rm -f $HOME/.neo4j/known_hosts
+  fi
+}
+
 function installCluster() {
   prefix=$1
   typeset -i i END # Let's be explicit
@@ -119,6 +125,18 @@ function makeDiscoveryMembersConfig() {
   echo $members
 }
 
+function makeAdvertisedAddress() {
+  prefix=$1
+  index=$2
+  if [ -n "$ADVERTISED_HOSTNAME" ] ; then
+    echo "$ADVERTISED_HOSTNAME" \
+      | sed -e "s/PREFIX/$prefix/" \
+      | sed -e "s/INDEX/$index/"
+  else
+    echo "localhost"
+  fi
+}
+
 function configureCluster() {
   members=$(makeDiscoveryMembersConfig)
   prefix=$1
@@ -131,14 +149,17 @@ function configureCluster() {
       echo "Configuring $dir"
       mkdir -p $dir/conf
       cp -a $NEO4J_TEMPLATE/conf/neo4j.conf $dir/conf/
+      advertised_address=$(makeAdvertisedAddress $prefix $i)
       conf_patch="neo4j.conf.${prefix}_${i}.patch"
       echo -e "\tMaking patch for ${prefix}_${i} in $conf_patch"
       cat neo4j.conf.${prefix}.patch \
         | sed -e "s/^\+\(.*\)1$/\+\1$i/" \
+        | sed -e "s/^\+dbms.connectors.default_advertised_address=localhost$/\+dbms.connectors.default_advertised_address=$advertised_address/" \
         | sed -e "s/^\+core_edge.expected_core_cluster_size=3$/\+core_edge.expected_core_cluster_size=$NUMBER_CORES/" \
         | sed -e "s/^\+core_edge.initial_discovery_members=.*$/\+core_edge.initial_discovery_members=$members/" \
         > $conf_patch
       if [ -f "$conf_patch" ] ; then
+        rm -f "$dir/conf/neo4j.conf.back"
         echo -e "\tPatching $dir/conf/neo4j.conf"
         patch -s -i $conf_patch $dir/conf/neo4j.conf
         printConfigFromPatch $conf_patch
@@ -276,4 +297,8 @@ function startCluster() {
 
 function stopCluster() {
   clusterCommand "stop" $@
+}
+
+function restartCluster() {
+  clusterCommand "restart" $@
 }

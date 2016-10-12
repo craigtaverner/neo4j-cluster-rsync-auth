@@ -20,6 +20,7 @@ function waitFor() {
   waitForCluster "$prefix" $num
 }
 
+deleteKnownHosts
 installAndConfigure "core" $NUMBER_CORES
 installAndConfigure "edge" $NUMBER_EDGES
 waitFor "core" $NUMBER_CORES
