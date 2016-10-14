@@ -29,7 +29,7 @@ function runQueryOn() {
   cypher=$5
   if [ -z "$cypher" ] ; then
     duration=$((${index} * 10))
-    cypher="CALL test.waitFor('${duration}s')"
+    cypher="CALL training.waitFor('${duration}s')"
   fi
   if [ "$prefix" = "core" ] ; then
     address="bolt://localhost:769$index"
@@ -70,7 +70,7 @@ function runQueriesOnCluster() {
 function makeQuery() {
   duration=$1
   username=$2
-  echo "OPTIONAL MATCH (n) WITH '$username' as user, collect(n) as nodes CALL test.waitFor('${duration}s') RETURN 0"
+  echo "OPTIONAL MATCH (n) WITH '$username' as user, collect(n) as nodes CALL training.waitFor('${duration}s') RETURN 0"
 }
 
 runQueriesOnCluster "core" $NUMBER_CORES "$USER_NAME" "$USER_PW" 30
